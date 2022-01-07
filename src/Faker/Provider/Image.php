@@ -3,73 +3,48 @@
 namespace Faker\Provider;
 
 /**
- * Depends on image generation from http://lorempixel.com/
+ * Depends on image generation from https://picsum.photos/id/692/640/480
  */
 class Image extends Base
 {
     /**
      * @var string
      */
-    public const BASE_URL = 'https://via.placeholder.com';
-
-    /**
-     * @var array
-     *
-     * @deprecated Categories are no longer used as a list in the placeholder API but referenced as string instead
-     */
-    protected static $categories = [
-        'abstract', 'animals', 'business', 'cats', 'city', 'food', 'nightlife',
-        'fashion', 'people', 'nature', 'sports', 'technics', 'transport',
-    ];
+    public const BASE_URL = 'https://picsum.photos';
 
     /**
      * Generate the URL that will return a random image
      *
-     * Set randomize to false to remove the random GET parameter at the end of the url.
      *
-     * @example 'http://via.placeholder.com/640x480.png/CCCCCC?text=well+hi+there'
+     * @example 'https://picsum.photos/640/480.jpg?random=237'
+     * @example 'https://picsum.photos/id/237/640/480.jpg'
      *
      * @param int         $width
      * @param int         $height
-     * @param string|null $category
-     * @param bool        $randomize
-     * @param string|null $word
-     * @param bool        $gray
-     *
+     * @param bool        $random
      * @return string
      */
     public static function imageUrl(
         $width = 640,
         $height = 480,
-        $category = null,
-        $randomize = true,
-        $word = null,
-        $gray = false
+        $random = false
     ) {
-        $size = sprintf('%dx%d.png', $width, $height);
+        $size = sprintf('%d/%d', $width, $height);
 
-        $imageParts = [];
-
-        if ($category !== null) {
-            $imageParts[] = $category;
+        If ($random === true) {
+            return sprintf(
+                '%s/%s.jpg?random=%s',
+                self::BASE_URL,
+                $size,
+                rand(1, 5000)
+            );
         }
-
-        if ($word !== null) {
-            $imageParts[] = $word;
-        }
-
-        if ($randomize === true) {
-            $imageParts[] = Lorem::word();
-        }
-
-        $backgroundColor = $gray === true ? 'CCCCCC' : str_replace('#', '', Color::safeHexColor());
 
         return sprintf(
-            '%s/%s/%s%s',
+            '%s/id/%s/%s.jpg',
             self::BASE_URL,
+            rand(1, 1084),
             $size,
-            $backgroundColor,
-            count($imageParts) > 0 ? '?text=' . urlencode(implode(' ', $imageParts)) : ''
         );
     }
 
@@ -86,11 +61,7 @@ class Image extends Base
         $dir = null,
         $width = 640,
         $height = 480,
-        $category = null,
-        $fullPath = true,
-        $randomize = true,
-        $word = null,
-        $gray = false
+        $fullPath = true
     ) {
         $dir = null === $dir ? sys_get_temp_dir() : $dir; // GNU/Linux / OS X / Windows compatible
         // Validate directory path
@@ -101,10 +72,10 @@ class Image extends Base
         // Generate a random filename. Use the server address so that a file
         // generated at the same time on a different server won't have a collision.
         $name = md5(uniqid(empty($_SERVER['SERVER_ADDR']) ? '' : $_SERVER['SERVER_ADDR'], true));
-        $filename = $name . '.png';
+        $filename = $name . '.jpg';
         $filepath = $dir . DIRECTORY_SEPARATOR . $filename;
 
-        $url = static::imageUrl($width, $height, $category, $randomize, $word, $gray);
+        $url = static::imageUrl($width, $height);
 
         // save file
         if (function_exists('curl_exec')) {
