@@ -53,7 +53,7 @@ class Image extends Base
 
         If ($random === true) {
             return sprintf(
-                '%s/%s.jpg?random=%s',A
+                '%s/%s.jpg?random=%s',
                 self::BASE_URL,
                 $size,
                 rand(1, 5000)
