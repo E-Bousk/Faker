@@ -101,9 +101,18 @@ class Image extends Base
         if (function_exists('curl_exec')) {
             // use cURL
             $fp = fopen($filepath, 'w');
-            $ch = curl_init($url);
+
+            $ch = curl_init();
+            curl_setopt($ch, CURLOPT_URL, $url);
+            curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
+            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+            curl_exec($ch);
+
+            $url = curl_getinfo($ch, CURLINFO_EFFECTIVE_URL);
             curl_setopt($ch, CURLOPT_FILE, $fp);
+
             $success = curl_exec($ch) && curl_getinfo($ch, CURLINFO_HTTP_CODE) === 200;
+
             fclose($fp);
             curl_close($ch);
 
